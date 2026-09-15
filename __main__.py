@@ -1,92 +1,152 @@
-from computers.pc import PC
+from typing import Callable, Sequence
+
+import customtkinter
+
 from computers.laptop import Laptop
+from computers.pc import PC
 from computers.server import Server
+from interface.interface import Interface
 
 
-def create_objects():
-    devices = []
+class ComputerApp:
+    """CustomTkinter application for displaying and sorting computers."""
 
-    # 10 PC objects
-    pc_cpus = [
-        "Intel Core i3", "Intel Core i5", "Intel Core i7", "Intel Core i9", "AMD Ryzen 3",
-        "AMD Ryzen 5", "AMD Ryzen 7", "AMD Ryzen 9", "Intel Core i5-13400", "AMD Ryzen 5 5600X"
-    ]
-    for i in range(10):
-        pc = PC(
-            cpu=pc_cpus[i],
-            ram=8 + (i % 4) * 8,
-            storage=256 + (i * 256),
-            form_factor="Mini-ITX" if i % 2 == 0 else "ATX"
+    def __init__(self, computers: Sequence[Interface]) -> None:
+        self._computers = list(computers)
+        self._window = customtkinter.CTk()
+        self._text_box = customtkinter.CTkTextbox(
+            self._window,
+            corner_radius=8,
+            border_width=1,
+            border_color="#39214c",
+            font=("Consolas", 14),
+            activate_scrollbars=True,
         )
-        devices.append(pc)
+        self._create_layout()
+        self._show_computers("Initial order")
 
-    # 10 Laptop objects
-    laptop_cpus = [
-        "Apple M1", "Apple M2", "Apple M3", "Intel Core i5-1240P", "Intel Core i7-12700H",
-        "AMD Ryzen 7 6800U", "Intel Core Ultra 7", "AMD Ryzen 9 7940HS", "Apple M2 Pro", "Apple M3 Max"
-    ]
-    for i in range(10):
-        laptop = Laptop(
-            cpu=laptop_cpus[i],
-            ram=8 + (i % 3) * 8,
-            storage=512 + (i % 4) * 512,
-            battery_life=6 + i
+    def _create_layout(self) -> None:
+        self._window.title("Lab 2 GUI")
+        self._window.geometry("760x560")
+        self._window.minsize(620, 420)
+        self._window.configure(fg_color="#171717")
+        self._window.grid_columnconfigure(0, weight=1)
+        self._window.grid_rowconfigure(0, weight=1)
+        self._window.grid_rowconfigure(1, weight=0)
+
+        self._text_box.grid(row=0, column=0, padx=18, pady=(18, 12), sticky="nsew")
+        self._text_box.configure(state="disabled")
+
+        buttons = customtkinter.CTkFrame(
+            self._window,
+            fg_color="#251333",
+            corner_radius=8,
         )
-        devices.append(laptop)
+        buttons.grid(row=1, column=0, padx=18, pady=(0, 18), sticky="ew")
+        buttons.grid_columnconfigure((0, 1, 2), weight=1)
 
-    # 10 Server objects
-    server_cpus = [
-        "AMD EPYC 7763", "AMD EPYC 9654", "Intel Xeon Silver 4314", "Intel Xeon Gold 6330", "Intel Xeon Platinum 8380",
-        "AMD EPYC 7543", "Intel Xeon E-2388G", "AMD EPYC 9354", "Intel Xeon Gold 5418Y", "AMD EPYC 7713"
-    ]
-    for i in range(10):
-        server = Server(
-            cpu=server_cpus[i],
-            ram=32 + i * 32,
-            storage=1000 + i * 2000,
-            rack_units=1 + (i % 4)
+        self._create_sort_button(buttons, "Sort by CPU", self._sort_by_cpu, 0)
+        self._create_sort_button(buttons, "Sort by RAM", self._sort_by_ram, 1)
+        self._create_sort_button(buttons, "Sort by Storage", self._sort_by_storage, 2)
+
+    def _create_sort_button(
+        self,
+        parent: customtkinter.CTkFrame,
+        text: str,
+        command: Callable[[], None],
+        column: int,
+    ) -> None:
+        button = customtkinter.CTkButton(
+            parent,
+            text=text,
+            command=command,
+            height=36,
+            corner_radius=7,
+            fg_color="#51386d",
+            hover_color="#68488a",
         )
-        devices.append(server)
+        button.grid(row=0, column=column, padx=10, pady=10, sticky="ew")
 
-    return devices
+    def _sort_by_cpu(self) -> None:
+        self._computers.sort(key=lambda computer: str(computer.get_parameter("cpu")))
+        self._show_computers("Sorted by CPU")
+
+    def _sort_by_ram(self) -> None:
+        self._computers.sort(key=lambda computer: computer.get_parameter("ram"), reverse=True)
+        self._show_computers("Sorted by RAM (descending)")
+
+    def _sort_by_storage(self) -> None:
+        self._computers.sort(key=lambda computer: computer.get_parameter("storage"), reverse=True)
+        self._show_computers("Sorted by Storage (descending)")
+
+    def _show_computers(self, title: str) -> None:
+        rows = [title, "", f"{'Type':<10}{'CPU':<25}{'RAM':>8}{'Storage':>12}", "-" * 55]
+        rows.extend(
+            f"{computer.__class__.__name__:<10}"
+            f"{str(computer.get_parameter('cpu')):<25}"
+            f"{str(computer.get_parameter('ram')):>8}"
+            f"{str(computer.get_parameter('storage')):>12}"
+            for computer in self._computers
+        )
+        self._text_box.configure(state="normal")
+        self._text_box.delete("1.0", "end")
+        self._text_box.insert("1.0", "\n".join(rows))
+        self._text_box.configure(state="disabled")
+
+    def run(self) -> None:
+        """Start the CustomTkinter event loop."""
+        self._window.mainloop()
 
 
-def main():
-    devices = create_objects()
+class ComputerCatalog:
+    """Factory for the computer collection used by the laboratory GUI."""
 
-    print(f"Total objects created: {len(devices)}\n")
-    print("=" * 85)
-    print(f"{'№':<3} | {'Class':<8} | {'CPU (ЦП)':<22} | {'RAM (ОЗУ)':<10} | {'Storage (Память)':<16} | {'Extra Param'}")
-    print("=" * 85)
+    def create_devices(self) -> list[Interface]:
+        devices: list[Interface] = []
+        pc_cpus = [
+            "Intel Core i3", "Intel Core i5", "Intel Core i7", "Intel Core i9", "AMD Ryzen 3",
+            "AMD Ryzen 5", "AMD Ryzen 7", "AMD Ryzen 9", "Intel Core i5-13400", "AMD Ryzen 5 5600X",
+        ]
+        for index in range(10):
+            devices.append(PC(
+                cpu=pc_cpus[index],
+                ram=8 + (index % 4) * 8,
+                storage=256 + index * 256,
+                form_factor="Mini-ITX" if index % 2 == 0 else "ATX",
+            ))
 
-    for idx, dev in enumerate(devices, 1):
-        cpu = dev.get_parameter("cpu")
-        ram = f"{dev.get_parameter('ram')} GB"
-        storage = f"{dev.get_parameter('storage')} GB"
+        laptop_cpus = [
+            "Apple M1", "Apple M2", "Apple M3", "Intel Core i5-1240P", "Intel Core i7-12700H",
+            "AMD Ryzen 7 6800U", "Intel Core Ultra 7", "AMD Ryzen 9 7940HS", "Apple M2 Pro", "Apple M3 Max",
+        ]
+        for index in range(10):
+            devices.append(Laptop(
+                cpu=laptop_cpus[index],
+                ram=8 + (index % 3) * 8,
+                storage=512 + (index % 4) * 512,
+                battery_life=6 + index,
+            ))
 
-        extra = ""
-        if isinstance(dev, PC):
-            extra = f"Form: {dev.get_parameter('form_factor')}"
-        elif isinstance(dev, Laptop):
-            extra = f"Battery: {dev.get_parameter('battery_life')}h"
-        elif isinstance(dev, Server):
-            extra = f"Rack: {dev.get_parameter('rack_units')}U"
+        server_cpus = [
+            "AMD EPYC 7763", "AMD EPYC 9654", "Intel Xeon Silver 4314", "Intel Xeon Gold 6330", "Intel Xeon Platinum 8380",
+            "AMD EPYC 7543", "Intel Xeon E-2388G", "AMD EPYC 9354", "Intel Xeon Gold 5418Y", "AMD EPYC 7713",
+        ]
+        for index in range(10):
+            devices.append(Server(
+                cpu=server_cpus[index],
+                ram=32 + index * 32,
+                storage=1000 + index * 2000,
+                rack_units=1 + index % 4,
+            ))
+        return devices
 
-        print(f"{idx:<3} | {dev.__class__.__name__:<8} | {cpu:<22} | {ram:<10} | {storage:<16} | {extra}")
 
-    print("=" * 85)
+class LaboratoryApplication:
+    """Composition root for the object catalog and GUI."""
 
-    # Demonstration of set_parameter and get_parameter interface methods
-    print("\nDemonstration of set_parameter and get_parameter interface methods on object #1:")
-    sample_dev = devices[0]
-    print(f"Before modification: {sample_dev}")
-    sample_dev.set_parameter("ram", 64)
-    sample_dev.set_parameter("cpu", "Intel Core i9-13900K")
-    print(f"After set_parameter('ram', 64) & set_parameter('cpu', ...): {sample_dev}")
-    print(f"Getting parameter 'cpu': {sample_dev.get_parameter('cpu')}")
-    print(f"Getting parameter 'ram': {sample_dev.get_parameter('ram')}")
+    def run(self) -> None:
+        ComputerApp(ComputerCatalog().create_devices()).run()
 
 
 if __name__ == "__main__":
-    main()
-
+    LaboratoryApplication().run()

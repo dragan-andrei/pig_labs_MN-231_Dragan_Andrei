@@ -2,14 +2,14 @@ from abc import ABC, abstractmethod
 
 
 class Interface(ABC):
-    """Contract for objects exposing named parameters."""
+    """Контракт объектов, которые хранят параметры компьютера."""
 
     @abstractmethod
     def set_parameter(self, param_name: str, value) -> None:
-        """Set a parameter value by name."""
+        """Изменить значение параметра по имени."""
         pass
 
     @abstractmethod
     def get_parameter(self, param_name: str):
-        """Get a parameter value by name."""
+        """Получить значение параметра по имени."""
         pass

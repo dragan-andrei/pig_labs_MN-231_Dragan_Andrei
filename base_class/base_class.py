@@ -2,20 +2,23 @@ from interface.interface import Interface
 
 
 class Computer(Interface):
+    """Общая модель компьютера с CPU, RAM и накопителем."""
 
     def __init__(self, cpu: str = "Unknown CPU", ram: int = 8, storage: int = 256):
+        # Все параметры хранятся в одном словаре, чтобы их можно было
+        # одинаково получать из сортировок и графического интерфейса.
         self._parameters = {
             "cpu": cpu,
-            "ram": ram,        # in GB
-            "storage": storage  # in GB
+            "ram": ram,        # Объём оперативной памяти в GB.
+            "storage": storage  # Объём накопителя в GB.
         }
 
     def set_parameter(self, param_name: str, value) -> None:
-        """Sets parameter by name."""
+        """Изменить параметр по его имени."""
         self._parameters[param_name] = value
 
     def get_parameter(self, param_name: str):
-        """Gets parameter by name."""
+        """Получить значение параметра по его имени."""
         return self._parameters.get(param_name, None)
 
     @property

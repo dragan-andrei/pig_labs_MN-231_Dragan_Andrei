@@ -33,7 +33,8 @@ class SortStrategyError(DomainError):
 class PurpleTheme:
     """Design tokens and color palette maintaining a refined purple aesthetic."""
 
-    # Backgrounds
+    # Здесь можно менять основные цвета интерфейса.
+    # BG_WINDOW — фон окна, остальные цвета отвечают за отдельные панели.
     BG_WINDOW: Final[str] = "#140f1c"
     BG_CARD_CONTAINER: Final[str] = "#191224"
     BG_CARD_EVEN: Final[str] = "#1e152a"
@@ -41,24 +42,24 @@ class PurpleTheme:
     BG_HEADER_ROW: Final[str] = "#291a3c"
     BG_BUTTON_BAR: Final[str] = "#251333"
 
-    # Borders & Dividers
+    # Цвета границ и разделителей таблицы.
     BORDER_SUBTLE: Final[str] = "#36204d"
     BORDER_HEADER: Final[str] = "#4c2c6d"
     BORDER_ACTIVE: Final[str] = "#8b5cf6"
 
-    # Button States
+    # Цвета кнопок: обычное состояние, наведение и выбранная кнопка.
     BTN_DEFAULT_BG: Final[str] = "#51386d"
     BTN_DEFAULT_HOVER: Final[str] = "#68488a"
     BTN_ACTIVE_BG: Final[str] = "#7b47a6"
     BTN_ACTIVE_HOVER: Final[str] = "#9156c2"
 
-    # Typography & Foreground
-    TEXT_PRIMARY: Final[str] = "#f5eefc"
+    # Цвета текста: основной, второстепенный, приглушённый и акцентный.
+    TEXT_PRIMARY: Final[str] = "#fcf4ee"
     TEXT_SECONDARY: Final[str] = "#bca9d3"
     TEXT_MUTED: Final[str] = "#8d79a5"
     TEXT_ACCENT: Final[str] = "#d8b4fe"
 
-    # Type Badges
+    # Цвет текста устройств разных типов.
     BADGE_PC_BG: Final[str] = "#2e1b4a"
     BADGE_PC_TEXT: Final[str] = "#c084fc"
     BADGE_LAPTOP_BG: Final[str] = "#3d1b40"
@@ -128,6 +129,8 @@ class CpuPowerCatalog:
     the catalog. A higher score means a more powerful processor.
     """
 
+    # Здесь можно менять баллы мощности процессоров.
+    # Чем больше число, тем выше процессор окажется при сортировке по CPU Power.
     _SCORES: dict[str, int] = {
         "Intel Core i3": 9000,
         "Intel Core i5": 15000,
@@ -404,9 +407,11 @@ class ActivityIndicator(customtkinter.CTkFrame):
 
     def __init__(self, parent: customtkinter.CTkBaseClass) -> None:
         super().__init__(parent, fg_color="transparent")
+        # Можно заменить символы анимации на любые подходящие знаки.
         self._frames = ("◐", "◓", "◑", "◒")
         self._frame_index = 0
         self._is_online = True
+        # Интервал обновления LIVE в миллисекундах задаётся в _animate().
         self._animation_id: str | None = None
         self._toggle_button = customtkinter.CTkButton(
             self,
@@ -420,6 +425,7 @@ class ActivityIndicator(customtkinter.CTkFrame):
             height=28,
         )
         self._toggle_button.pack(padx=4, pady=4)
+        # Полоска создаёт дополнительное движение рядом с LIVE.
         self._pulse_bar = customtkinter.CTkProgressBar(
             self,
             mode="indeterminate",
@@ -428,6 +434,7 @@ class ActivityIndicator(customtkinter.CTkFrame):
             progress_color=PurpleTheme.BORDER_ACTIVE,
         )
         self._pulse_bar.pack(padx=4, pady=(0, 4))
+        # Скорость полоски можно изменить параметром number_of_steps/speed.
         self._pulse_bar.start()
         self._animate()
 
@@ -481,12 +488,14 @@ class HeaderBannerView(customtkinter.CTkFrame):
             border_width=1,
             border_color=PurpleTheme.BORDER_SUBTLE,
         )
+        # Текст названия приложения можно изменить здесь.
         self._title_label = customtkinter.CTkLabel(
             self,
             text="⚡ Computer Systems Catalog",
             font=("Segoe UI", 16, "bold"),
-            text_color=PurpleTheme.TEXT_PRIMARY,
+            text_color="red",
         )
+        # В этой метке показывается количество объектов и текущая сортировка.
         self._status_badge = customtkinter.CTkLabel(
             self,
             text="30 devices | Исходный порядок",
@@ -532,6 +541,7 @@ class TableHeaderView(customtkinter.CTkFrame):
             border_color=PurpleTheme.BORDER_HEADER,
             height=34,
         )
+        # Ширины здесь должны совпадать с ширинами в ComputerApp._render_rows().
         self._header_label = customtkinter.CTkLabel(
             self,
             text=(
@@ -645,6 +655,7 @@ class SortButtonBar(customtkinter.CTkFrame):
         )
         self._on_sort_selected = on_sort_selected
         self._buttons: dict[str, customtkinter.CTkButton] = {}
+        # Порядок стратегий определяет порядок кнопок слева направо.
         self._strategies: list[ISortStrategy] = [
             CpuSortStrategy(),
             RamSortStrategy(),
@@ -718,12 +729,14 @@ class ComputerApp:
         self._render_rows("Исходный порядок")
 
     def _setup_window(self) -> None:
+        # Здесь меняются размеры окна и минимальный размер при растягивании.
         self._window.title("Lab 2 GUI - Computer Catalog")
-        self._window.geometry("820x620")
-        self._window.minsize(680, 460)
+        self._window.geometry("820x760")
+        self._window.minsize(680, 700)
         self._window.configure(fg_color=PurpleTheme.BG_WINDOW)
 
     def _create_layout(self) -> None:
+        # Основная сетка: сверху контент, снизу панель кнопок сортировки.
         # Original grid structure: row 0 = main content, row 1 = buttons
         self._window.grid_columnconfigure(0, weight=1)
         self._window.grid_rowconfigure(0, weight=1)
@@ -740,26 +753,29 @@ class ComputerApp:
         main_container.grid_rowconfigure(1, weight=0)  # Column headers
         main_container.grid_rowconfigure(2, weight=1)  # Scrollable list
 
-        # 1. Header Banner
+        # 1. Верхняя панель с названием, статусом и LIVE.
         self._header_banner = HeaderBannerView(main_container)
         self._header_banner.grid(row=0, column=0, sticky="ew", pady=(0, 8))
 
-        # 2. Table Column Headers
+        # 2. Заголовки колонок. Их ширины синхронизированы со строками ниже.
         self._table_header = TableHeaderView(main_container)
         self._table_header.grid(row=1, column=0, sticky="ew", pady=(0, 4))
 
-        # 3. Textbox keeps the whole catalog in one lightweight widget.
+        # 3. Один CTkTextbox содержит весь список и не создаёт отдельный виджет для каждой строки.
         self._device_textbox = customtkinter.CTkTextbox(
             main_container,
-            height=420,
+            height=590,
             fg_color=PurpleTheme.BG_CARD_CONTAINER,
             corner_radius=8,
             border_width=1,
             border_color=PurpleTheme.BORDER_SUBTLE,
             font=("Cascadia Mono", 12),
-            activate_scrollbars=True,
+            activate_scrollbars=False,
         )
         self._device_textbox.grid(row=2, column=0, sticky="nsew")
+        self._device_textbox.bind("<MouseWheel>", lambda event: "break")
+        self._device_textbox.bind("<Button-4>", lambda event: "break")
+        self._device_textbox.bind("<Button-5>", lambda event: "break")
         self._device_textbox.tag_config("title", foreground=PurpleTheme.TEXT_ACCENT)
         self._device_textbox.tag_config("header", foreground=PurpleTheme.TEXT_PRIMARY)
         self._device_textbox.tag_config("separator", foreground=PurpleTheme.BORDER_HEADER)
@@ -768,7 +784,7 @@ class ComputerApp:
         self._device_textbox.tag_config("server", foreground=PurpleTheme.BADGE_SERVER_TEXT)
         self._device_textbox.configure(state="disabled")
 
-        # Buttons Bar (Row 1, keeping the original layout grid)
+        # Нижняя панель с тремя кнопками сортировки.
         self._button_bar = SortButtonBar(
             self._window,
             on_sort_selected=self._handle_sort_request,
@@ -783,6 +799,7 @@ class ComputerApp:
         - Consecutive click on the SAME column toggles to ASCENDING.
         - Subsequent clicks toggle between DESCENDING and ASCENDING.
         """
+        # Первый клик сортирует по убыванию, повторный клик меняет направление.
         if self._active_strategy is None or self._active_strategy.key_name != strategy.key_name:
             # First click on this column: always descending (от большего к меньшему)
             self._active_strategy = strategy
@@ -807,6 +824,8 @@ class ComputerApp:
     def _render_rows(self, status_description: str) -> None:
         """Render all devices in one textbox instead of rebuilding widgets."""
         self._header_banner.update_status(len(self._computers), status_description)
+        # Эти значения задают положение колонок в моноширинной таблице.
+        # При изменении ширины здесь нужно изменить такие же значения в TableHeaderView.
         type_width = 12
         cpu_width = 29
         ram_width = 10
@@ -852,6 +871,8 @@ class ComputerCatalog:
     def create_devices(self) -> list[Interface]:
         """Instantiate and return standard list of laboratory devices."""
         devices: list[Interface] = []
+        # Ниже находятся исходные данные для 10 компьютеров, 10 ноутбуков и 10 серверов.
+        # Здесь можно менять модели CPU, RAM, storage и дополнительные параметры.
         pc_cpus = [
             "Intel Core i3", "Intel Core i5", "Intel Core i7", "Intel Core i9", "AMD Ryzen 3",
             "AMD Ryzen 5", "AMD Ryzen 7", "AMD Ryzen 9", "Intel Core i5-13400", "AMD Ryzen 5 5600X",

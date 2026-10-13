@@ -7,6 +7,7 @@ from typing import Dict, List, Optional, Sequence, Tuple
 from model.exceptions import ModelError, SortStrategyError
 from model.interface import Interface
 from model.model_interface import IComputerModel
+from model.device_repository import IDeviceRepository
 from model.sorting.base_strategy import ISortStrategy
 from model.sorting.cpu_strategy import CpuSortStrategy
 from model.sorting.direction import SortDirection
@@ -17,7 +18,11 @@ from model.sorting.storage_strategy import StorageSortStrategy
 class ComputerModel(IComputerModel):
     """Encapsulates catalog state, device persistence, and data processing operations."""
 
-    def __init__(self, initial_devices: Sequence[Interface]) -> None:
+    def __init__(
+        self,
+        initial_devices: Sequence[Interface],
+        repository: Optional[IDeviceRepository] = None,
+    ) -> None:
         """Initialize ComputerModel with devices and default sorting strategies.
 
         Args:
@@ -25,6 +30,7 @@ class ComputerModel(IComputerModel):
         """
         self._initial_devices: List[Interface] = list(initial_devices)
         self._current_devices: List[Interface] = list(initial_devices)
+        self._repository = repository
         self._active_strategy: Optional[ISortStrategy] = None
         self._current_direction: Optional[SortDirection] = None
 
@@ -99,6 +105,7 @@ class ComputerModel(IComputerModel):
         self._current_devices = list(self._initial_devices)
         self._active_strategy = None
         self._current_direction = None
+        self._persist()
 
     def add_device(self, device: Interface) -> None:
         """Append a device and keep the current catalog state consistent."""
@@ -107,6 +114,7 @@ class ComputerModel(IComputerModel):
         self._current_devices.append(device)
         self._initial_devices.append(device)
         self._apply_active_sort()
+        self._persist()
 
     def update_device(self, index: int, device: Interface) -> None:
         """Replace a catalog item at a valid zero-based index."""
@@ -118,6 +126,7 @@ class ComputerModel(IComputerModel):
         initial_index = self._initial_devices.index(previous)
         self._initial_devices[initial_index] = device
         self._apply_active_sort()
+        self._persist()
 
     def delete_device(self, index: int) -> None:
         """Delete a catalog item and its corresponding reset entry."""
@@ -125,6 +134,7 @@ class ComputerModel(IComputerModel):
         removed = self._current_devices.pop(index)
         self._initial_devices.remove(removed)
         self._apply_active_sort()
+        self._persist()
 
     def get_device(self, index: int) -> Interface:
         """Return a device at a valid zero-based index."""
@@ -143,6 +153,11 @@ class ComputerModel(IComputerModel):
                 self._current_devices,
                 self._current_direction,
             )
+
+    def _persist(self) -> None:
+        """Save current catalog state when persistence is configured."""
+        if self._repository is not None:
+            self._repository.save(self._initial_devices)
 
     def __repr__(self) -> str:
         """Return developer representation."""

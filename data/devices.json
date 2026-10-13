@@ -1,0 +1,281 @@
+[
+  {
+    "type": "PC",
+    "parameters": {
+      "cpu": "Intel Core i3",
+      "ram": 8,
+      "storage": 256,
+      "form_factor": "Mini-ITX"
+    }
+  },
+  {
+    "type": "PC",
+    "parameters": {
+      "cpu": "Intel Core i5",
+      "ram": 16,
+      "storage": 512,
+      "form_factor": "ATX"
+    }
+  },
+  {
+    "type": "PC",
+    "parameters": {
+      "cpu": "Intel Core i7",
+      "ram": 24,
+      "storage": 768,
+      "form_factor": "Mini-ITX"
+    }
+  },
+  {
+    "type": "PC",
+    "parameters": {
+      "cpu": "Intel Core i9",
+      "ram": 32,
+      "storage": 1024,
+      "form_factor": "ATX"
+    }
+  },
+  {
+    "type": "PC",
+    "parameters": {
+      "cpu": "AMD Ryzen 3",
+      "ram": 8,
+      "storage": 1280,
+      "form_factor": "Mini-ITX"
+    }
+  },
+  {
+    "type": "PC",
+    "parameters": {
+      "cpu": "AMD Ryzen 5",
+      "ram": 16,
+      "storage": 1536,
+      "form_factor": "ATX"
+    }
+  },
+  {
+    "type": "PC",
+    "parameters": {
+      "cpu": "AMD Ryzen 7",
+      "ram": 24,
+      "storage": 1792,
+      "form_factor": "Mini-ITX"
+    }
+  },
+  {
+    "type": "PC",
+    "parameters": {
+      "cpu": "AMD Ryzen 9",
+      "ram": 32,
+      "storage": 2048,
+      "form_factor": "ATX"
+    }
+  },
+  {
+    "type": "PC",
+    "parameters": {
+      "cpu": "Intel Core i5-13400",
+      "ram": 8,
+      "storage": 2304,
+      "form_factor": "Mini-ITX"
+    }
+  },
+  {
+    "type": "PC",
+    "parameters": {
+      "cpu": "AMD Ryzen 5 5600X",
+      "ram": 16,
+      "storage": 2560,
+      "form_factor": "ATX"
+    }
+  },
+  {
+    "type": "Laptop",
+    "parameters": {
+      "cpu": "Apple M1",
+      "ram": 8,
+      "storage": 512,
+      "battery_life": 6
+    }
+  },
+  {
+    "type": "Laptop",
+    "parameters": {
+      "cpu": "Apple M2",
+      "ram": 16,
+      "storage": 1024,
+      "battery_life": 7
+    }
+  },
+  {
+    "type": "Laptop",
+    "parameters": {
+      "cpu": "Apple M3",
+      "ram": 24,
+      "storage": 1536,
+      "battery_life": 8
+    }
+  },
+  {
+    "type": "Laptop",
+    "parameters": {
+      "cpu": "Intel Core i5-1240P",
+      "ram": 8,
+      "storage": 2048,
+      "battery_life": 9
+    }
+  },
+  {
+    "type": "Laptop",
+    "parameters": {
+      "cpu": "Intel Core i7-12700H",
+      "ram": 16,
+      "storage": 512,
+      "battery_life": 10
+    }
+  },
+  {
+    "type": "Laptop",
+    "parameters": {
+      "cpu": "AMD Ryzen 7 6800U",
+      "ram": 24,
+      "storage": 1024,
+      "battery_life": 11
+    }
+  },
+  {
+    "type": "Laptop",
+    "parameters": {
+      "cpu": "Intel Core Ultra 7",
+      "ram": 8,
+      "storage": 1536,
+      "battery_life": 12
+    }
+  },
+  {
+    "type": "Laptop",
+    "parameters": {
+      "cpu": "AMD Ryzen 9 7940HS",
+      "ram": 16,
+      "storage": 2048,
+      "battery_life": 13
+    }
+  },
+  {
+    "type": "Laptop",
+    "parameters": {
+      "cpu": "Apple M2 Pro",
+      "ram": 24,
+      "storage": 512,
+      "battery_life": 14
+    }
+  },
+  {
+    "type": "Laptop",
+    "parameters": {
+      "cpu": "Apple M3 Max",
+      "ram": 8,
+      "storage": 1024,
+      "battery_life": 15
+    }
+  },
+  {
+    "type": "Server",
+    "parameters": {
+      "cpu": "AMD EPYC 7763",
+      "ram": 32,
+      "storage": 1000,
+      "rack_units": 1
+    }
+  },
+  {
+    "type": "Server",
+    "parameters": {
+      "cpu": "AMD EPYC 9654",
+      "ram": 64,
+      "storage": 3000,
+      "rack_units": 2
+    }
+  },
+  {
+    "type": "Server",
+    "parameters": {
+      "cpu": "Intel Xeon Silver 4314",
+      "ram": 96,
+      "storage": 5000,
+      "rack_units": 3
+    }
+  },
+  {
+    "type": "Server",
+    "parameters": {
+      "cpu": "Intel Xeon Gold 6330",
+      "ram": 128,
+      "storage": 7000,
+      "rack_units": 4
+    }
+  },
+  {
+    "type": "Server",
+    "parameters": {
+      "cpu": "Intel Xeon Platinum 8380",
+      "ram": 160,
+      "storage": 9000,
+      "rack_units": 1
+    }
+  },
+  {
+    "type": "Server",
+    "parameters": {
+      "cpu": "AMD EPYC 7543",
+      "ram": 192,
+      "storage": 11000,
+      "rack_units": 2
+    }
+  },
+  {
+    "type": "Server",
+    "parameters": {
+      "cpu": "Intel Xeon E-2388G",
+      "ram": 224,
+      "storage": 13000,
+      "rack_units": 3
+    }
+  },
+  {
+    "type": "Server",
+    "parameters": {
+      "cpu": "AMD EPYC 9354",
+      "ram": 256,
+      "storage": 15000,
+      "rack_units": 4
+    }
+  },
+  {
+    "type": "Server",
+    "parameters": {
+      "cpu": "Intel Xeon Gold 5418Y",
+      "ram": 288,
+      "storage": 17000,
+      "rack_units": 1
+    }
+  },
+  {
+    "type": "Server",
+    "parameters": {
+      "cpu": "AMD EPYC 7713",
+      "ram": 320,
+      "storage": 19000,
+      "rack_units": 2
+    }
+  },
+  {
+    "type": "PC",
+    "parameters": {
+      "cpu": "Apple M5 MAX",
+      "ram": 900,
+      "storage": 12980,
+      "form_factor": "1"
+    }
+  }
+]

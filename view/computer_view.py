@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Optional, Sequence
 
 import customtkinter
@@ -14,6 +15,7 @@ from view.widgets.header_banner import HeaderBannerView
 from view.widgets.sort_button_bar import SortButtonBar
 from view.widgets.device_card import DeviceCard
 from view.widgets.device_form import DeviceFormDialog
+from view.services.image_repository import DeviceImageRepository
 
 
 class ComputerView(IComputerView):
@@ -24,6 +26,9 @@ class ComputerView(IComputerView):
         self._presenter: Optional[IComputerPresenter] = None
         self._window = customtkinter.CTk()
         self._device_cards: list[DeviceCard] = []
+        self._image_repository = DeviceImageRepository(
+            Path(__file__).resolve().parents[1] / "assets" / "devices"
+        )
         self._setup_window()
         self._create_layout()
 
@@ -142,6 +147,7 @@ class ComputerView(IComputerView):
                 device,
                 on_edit=self._open_edit_dialog,
                 on_delete=self._delete_device,
+                image_provider=self._image_repository,
                 row_number=row_number,
             )
             card.grid(row=row_number - 1, column=0, padx=10, pady=(8 if row_number == 1 else 4, 4), sticky="ew")

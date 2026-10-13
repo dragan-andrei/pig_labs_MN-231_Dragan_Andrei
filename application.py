@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from model.catalog import ComputerCatalog
 from model.computer_model import ComputerModel
+from model.device_repository import JsonDeviceRepository
+from model.exceptions import ModelError
 from presenter.computer_presenter import ComputerPresenter
 from view.computer_view import ComputerView
 
@@ -15,7 +19,10 @@ class LaboratoryApplication:
         """Instantiate and wire up catalog model, visual view, and mediating presenter."""
         # 1. Model: Domain entity storage and sorting logic
         catalog = ComputerCatalog()
-        self._model = ComputerModel(initial_devices=catalog.create_devices())
+        storage = JsonDeviceRepository(Path(__file__).resolve().parent / "data" / "devices.json")
+        saved_devices = storage.load()
+        initial_devices = saved_devices if storage.has_saved_data else catalog.create_devices()
+        self._model = ComputerModel(initial_devices=initial_devices, repository=storage)
 
         # 2. View: Pure graphical user interface
         self._view = ComputerView()

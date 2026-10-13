@@ -54,3 +54,19 @@ class IComputerModel(ABC):
     @abstractmethod
     def reset(self) -> None:
         """Reset devices back to original initial dataset ordering."""
+
+    @abstractmethod
+    def add_device(self, device: Interface) -> None:
+        """Add a validated device to the catalog."""
+
+    @abstractmethod
+    def update_device(self, index: int, device: Interface) -> None:
+        """Replace the device at index with a validated device."""
+
+    @abstractmethod
+    def delete_device(self, index: int) -> None:
+        """Delete the device at index."""
+
+    @abstractmethod
+    def get_device(self, index: int) -> Interface:
+        """Return the device at index."""

@@ -33,6 +33,10 @@ class Interface(ABC):
         """
 
     @abstractmethod
+    def get_parameters(self) -> dict[str, Any]:
+        """Return a copy of all public device parameters."""
+
+    @abstractmethod
     def __str__(self) -> str:
         """Return human-readable string representation."""
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Tuple
+from typing import Any, Dict, Tuple
 
 from model.interface import Interface
 from view.theme import PurpleTheme
@@ -93,6 +93,7 @@ class BaseDevicePresenter(IDevicePresenter):
             ram_text=self.ram_text,
             storage_text=self.storage_text,
             extra_text=self.extra_text,
+            parameters=self._device.get_parameters(),
         )
 
     def __repr__(self) -> str:

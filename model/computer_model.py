@@ -100,6 +100,50 @@ class ComputerModel(IComputerModel):
         self._active_strategy = None
         self._current_direction = None
 
+    def add_device(self, device: Interface) -> None:
+        """Append a device and keep the current catalog state consistent."""
+        if not isinstance(device, Interface):
+            raise ModelError("Only Interface-compatible devices can be added.")
+        self._current_devices.append(device)
+        self._initial_devices.append(device)
+        self._apply_active_sort()
+
+    def update_device(self, index: int, device: Interface) -> None:
+        """Replace a catalog item at a valid zero-based index."""
+        self._validate_index(index)
+        if not isinstance(device, Interface):
+            raise ModelError("Only Interface-compatible devices can be stored.")
+        previous = self._current_devices[index]
+        self._current_devices[index] = device
+        initial_index = self._initial_devices.index(previous)
+        self._initial_devices[initial_index] = device
+        self._apply_active_sort()
+
+    def delete_device(self, index: int) -> None:
+        """Delete a catalog item and its corresponding reset entry."""
+        self._validate_index(index)
+        removed = self._current_devices.pop(index)
+        self._initial_devices.remove(removed)
+        self._apply_active_sort()
+
+    def get_device(self, index: int) -> Interface:
+        """Return a device at a valid zero-based index."""
+        self._validate_index(index)
+        return self._current_devices[index]
+
+    def _validate_index(self, index: int) -> None:
+        """Reject indexes that do not address a current device."""
+        if not isinstance(index, int) or not 0 <= index < len(self._current_devices):
+            raise ModelError(f"Device index '{index}' is out of range.")
+
+    def _apply_active_sort(self) -> None:
+        """Reapply the selected strategy after a collection mutation."""
+        if self._active_strategy is not None and self._current_direction is not None:
+            self._current_devices = self._active_strategy.sort(
+                self._current_devices,
+                self._current_direction,
+            )
+
     def __repr__(self) -> str:
         """Return developer representation."""
         return (

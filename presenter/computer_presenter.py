@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from typing import List
+from typing import Any, Dict, List
 
 from model.exceptions import DomainError
+from model.device_factory import DeviceFactory
 from model.interface import Interface
 from model.model_interface import IComputerModel
 from presenter.adapters.presenter_factory import DevicePresenterFactory
@@ -53,13 +54,49 @@ class ComputerPresenter(IComputerPresenter):
         except DomainError as err:
             self._view.show_error(f"Ошибка сброса: {err}")
 
+    def handle_add_requested(self, device_type: str, values: Dict[str, Any]) -> None:
+        """Create a device through the model and refresh the view."""
+        try:
+            self._model.add_device(DeviceFactory.create(device_type, values))
+            self._update_view_from_model()
+        except DomainError as err:
+            self._view.show_error(f"Ошибка добавления: {err}")
+
+    def handle_edit_requested(self, index: int, device_type: str, values: Dict[str, Any]) -> None:
+        """Replace a device through the model and refresh the view."""
+        try:
+            self._model.update_device(index, DeviceFactory.create(device_type, values))
+            self._update_view_from_model()
+        except DomainError as err:
+            self._view.show_error(f"Ошибка редактирования: {err}")
+
+    def handle_delete_requested(self, index: int) -> None:
+        """Delete a device through the model and refresh the view."""
+        try:
+            self._model.delete_device(index)
+            self._update_view_from_model()
+        except DomainError as err:
+            self._view.show_error(f"Ошибка удаления: {err}")
+
     def _update_view_from_model(self) -> None:
         """Helper to transform model state into view models and notify view."""
         devices = self._model.get_devices()
-        view_models: List[DeviceViewModel] = [
-            DevicePresenterFactory.create(device).to_view_model()
-            for device in devices
-        ]
+        view_models: List[DeviceViewModel] = []
+        for index, device in enumerate(devices):
+            view_model = DevicePresenterFactory.create(device).to_view_model()
+            view_models.append(
+                DeviceViewModel(
+                    type_name=view_model.type_name,
+                    badge_bg=view_model.badge_colors[0],
+                    badge_fg=view_model.badge_colors[1],
+                    cpu_text=view_model.cpu_text,
+                    ram_text=view_model.ram_text,
+                    storage_text=view_model.storage_text,
+                    extra_text=view_model.extra_text,
+                    device_index=index,
+                    parameters=device.get_parameters(),
+                )
+            )
 
         active_strategy = self._model.get_active_strategy()
         direction = self._model.get_current_direction()

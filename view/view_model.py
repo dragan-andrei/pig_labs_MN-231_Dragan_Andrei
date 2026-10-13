@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Tuple
+from typing import Any, Dict, Tuple
 
 
 class DeviceViewModel:
@@ -17,6 +17,8 @@ class DeviceViewModel:
         ram_text: str,
         storage_text: str,
         extra_text: str,
+        device_index: int = -1,
+        parameters: Dict[str, Any] | None = None,
     ) -> None:
         """Initialize presentation model with formatted strings and theme colors.
 
@@ -36,6 +38,8 @@ class DeviceViewModel:
         self._ram_text = ram_text
         self._storage_text = storage_text
         self._extra_text = extra_text
+        self._device_index = device_index
+        self._parameters = dict(parameters or {})
 
     @property
     def type_name(self) -> str:
@@ -66,6 +70,16 @@ class DeviceViewModel:
     def extra_text(self) -> str:
         """Return formatted supplementary details."""
         return self._extra_text
+
+    @property
+    def device_index(self) -> int:
+        """Return the current catalog index used by view callbacks."""
+        return self._device_index
+
+    @property
+    def parameters(self) -> Dict[str, Any]:
+        """Return editable raw device parameters."""
+        return dict(self._parameters)
 
     def __repr__(self) -> str:
         """Return developer representation."""

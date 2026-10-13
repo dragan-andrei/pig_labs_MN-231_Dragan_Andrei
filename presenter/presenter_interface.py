@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import Any, Dict
 
 
 class IComputerPresenter(ABC):
@@ -23,3 +24,15 @@ class IComputerPresenter(ABC):
     @abstractmethod
     def handle_reset_requested(self) -> None:
         """Handle reset request to return data to initial sequence."""
+
+    @abstractmethod
+    def handle_add_requested(self, device_type: str, values: Dict[str, Any]) -> None:
+        """Handle creation of a device submitted by the view."""
+
+    @abstractmethod
+    def handle_edit_requested(self, index: int, device_type: str, values: Dict[str, Any]) -> None:
+        """Handle replacement of an existing device submitted by the view."""
+
+    @abstractmethod
+    def handle_delete_requested(self, index: int) -> None:
+        """Handle deletion of a device requested by the view."""

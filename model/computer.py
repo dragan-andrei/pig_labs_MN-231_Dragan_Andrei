@@ -52,6 +52,10 @@ class Computer(Interface):
         """
         return self._parameters.get(param_name, None)
 
+    def get_parameters(self) -> Dict[str, Any]:
+        """Return a defensive copy of the device parameters."""
+        return dict(self._parameters)
+
     @property
     def cpu(self) -> str:
         """Return CPU model specification."""

@@ -12,7 +12,8 @@ from view.view_interface import IComputerView
 from view.view_model import DeviceViewModel
 from view.widgets.header_banner import HeaderBannerView
 from view.widgets.sort_button_bar import SortButtonBar
-from view.widgets.table_header import TableHeaderView
+from view.widgets.device_card import DeviceCard
+from view.widgets.device_form import DeviceFormDialog
 
 
 class ComputerView(IComputerView):
@@ -22,6 +23,7 @@ class ComputerView(IComputerView):
         """Initialize GUI window, containers, and layout."""
         self._presenter: Optional[IComputerPresenter] = None
         self._window = customtkinter.CTk()
+        self._device_cards: list[DeviceCard] = []
         self._setup_window()
         self._create_layout()
 
@@ -61,42 +63,31 @@ class ComputerView(IComputerView):
         self._header_banner = HeaderBannerView(main_container)
         self._header_banner.grid(row=0, column=0, sticky="ew", pady=(0, 8))
 
-        # 2. Table Column Headers
-        self._table_header = TableHeaderView(main_container)
-        self._table_header.grid(row=1, column=0, sticky="ew", pady=(0, 4))
-
-        # 3. Monospace Device Display Textbox
-        self._device_textbox = customtkinter.CTkTextbox(
+        # 2. Scrollable list of individual device cards
+        self._device_scroll = customtkinter.CTkScrollableFrame(
             main_container,
-            height=590,
             fg_color=PurpleTheme.BG_CARD_CONTAINER,
             corner_radius=8,
             border_width=1,
             border_color=PurpleTheme.BORDER_SUBTLE,
-            font=("Cascadia Mono", 12),
-            activate_scrollbars=False,
         )
-        self._device_textbox.grid(row=2, column=0, sticky="nsew")
-        self._device_textbox.bind("<MouseWheel>", lambda event: "break")
-        self._device_textbox.bind("<Button-4>", lambda event: "break")
-        self._device_textbox.bind("<Button-5>", lambda event: "break")
+        self._device_scroll.grid(row=1, column=0, rowspan=2, sticky="nsew", pady=(0, 8))
+        self._device_scroll.grid_columnconfigure(0, weight=1)
 
-        # Color syntax tags for monospace row formatting
-        self._device_textbox.tag_config("title", foreground=PurpleTheme.TEXT_ACCENT)
-        self._device_textbox.tag_config("header", foreground=PurpleTheme.TEXT_PRIMARY)
-        self._device_textbox.tag_config("separator", foreground=PurpleTheme.BORDER_HEADER)
-        self._device_textbox.tag_config("pc", foreground=PurpleTheme.BADGE_PC_TEXT)
-        self._device_textbox.tag_config("laptop", foreground=PurpleTheme.BADGE_LAPTOP_TEXT)
-        self._device_textbox.tag_config("server", foreground=PurpleTheme.BADGE_SERVER_TEXT)
-        self._device_textbox.tag_config("device", foreground=PurpleTheme.TEXT_PRIMARY)
-        self._device_textbox.configure(state="disabled")
-
-        # 4. Bottom Toolbar with sort action buttons (Row 1)
+        # 3. Bottom toolbar with add and sort actions
         self._button_bar = SortButtonBar(
             self._window,
             on_sort_requested=self._handle_sort_clicked,
         )
-        self._button_bar.grid(row=1, column=0, padx=18, pady=(0, 18), sticky="ew")
+        self._button_bar.grid(row=1, column=0, padx=18, pady=(0, 8), sticky="ew")
+        self._add_button = customtkinter.CTkButton(
+            self._window,
+            text="＋ Добавить устройство",
+            command=self._open_add_dialog,
+            fg_color=PurpleTheme.BTN_ACTIVE_BG,
+            hover_color=PurpleTheme.BTN_ACTIVE_HOVER,
+        )
+        self._add_button.grid(row=2, column=0, padx=18, pady=(0, 18), sticky="ew")
 
     def _handle_sort_clicked(self, key_name: str) -> None:
         """Callback triggered by toolbar buttons, delegating directly to presenter.
@@ -106,6 +97,26 @@ class ComputerView(IComputerView):
         """
         if self._presenter is not None:
             self._presenter.handle_sort_requested(key_name)
+
+    def _open_add_dialog(self) -> None:
+        """Open the add-device form."""
+        if self._presenter is not None:
+            DeviceFormDialog(self._window, ("PC", "Laptop", "Server"), self._presenter.handle_add_requested)
+
+    def _open_edit_dialog(self, device: DeviceViewModel) -> None:
+        """Open the edit form for one card."""
+        if self._presenter is not None:
+            DeviceFormDialog(
+                self._window,
+                ("PC", "Laptop", "Server"),
+                lambda device_type, values: self._presenter.handle_edit_requested(device.device_index, device_type, values),
+                device,
+            )
+
+    def _delete_device(self, index: int) -> None:
+        """Forward a card delete action to the presenter."""
+        if self._presenter is not None:
+            self._presenter.handle_delete_requested(index)
 
     def display_devices(
         self,
@@ -122,31 +133,19 @@ class ComputerView(IComputerView):
         """
         self._header_banner.update_status(total_count, status_description)
 
-        type_width = 12
-        cpu_width = 29
-        ram_width = 10
-        storage_width = 12
-        details_width = 18
-        line_length = type_width + cpu_width + ram_width + storage_width + details_width
-
-        self._device_textbox.configure(state="normal")
-        self._device_textbox.delete("1.0", "end")
-        self._device_textbox.insert("end", f"{status_description}\n", "title")
-        self._device_textbox.insert("end", "\n")
-        self._device_textbox.insert("end", "-" * line_length + "\n", "separator")
-
-        for dev in devices:
-            tag = dev.type_name.lower()
-            self._device_textbox.insert("end", f"{dev.type_name:<{type_width}}", tag)
-            self._device_textbox.insert(
-                "end",
-                f"{dev.cpu_text:<{cpu_width}}"
-                f"{dev.ram_text:>{ram_width}}"
-                f"{dev.storage_text:>{storage_width}}"
-                f"{dev.extra_text:>{details_width}}\n",
+        for card in self._device_cards:
+            card.destroy()
+        self._device_cards.clear()
+        for row_number, device in enumerate(devices, start=1):
+            card = DeviceCard(
+                self._device_scroll,
+                device,
+                on_edit=self._open_edit_dialog,
+                on_delete=self._delete_device,
+                row_number=row_number,
             )
-
-        self._device_textbox.configure(state="disabled")
+            card.grid(row=row_number - 1, column=0, padx=10, pady=(8 if row_number == 1 else 4, 4), sticky="ew")
+            self._device_cards.append(card)
 
     def update_sort_button_state(
         self,

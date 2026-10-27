@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional, Sequence, Tuple
 
+from model.charting.chart_series import ChartSeries
+from model.charting.chart_series_builder import ChartSeriesBuilder
 from model.exceptions import ModelError, SortStrategyError
 from model.interface import Interface
 from model.model_interface import IComputerModel
@@ -40,6 +42,30 @@ class ComputerModel(IComputerModel):
             "ram": RamSortStrategy(),
             "storage": StorageSortStrategy(),
         }
+        self._chart_builder = ChartSeriesBuilder()
+
+    def get_chart_metrics(self) -> Dict[str, str]:
+        """Return mapping of chart metric keys to display titles."""
+        return self._chart_builder.get_metric_titles()
+
+    def get_chart_series(
+        self,
+        metric_key: str,
+        direction: Optional[SortDirection] = None,
+    ) -> ChartSeries:
+        """Build a chart series from the current catalog ordering.
+
+        Args:
+            metric_key: Metric identifier.
+            direction: Optional ordering of chart points.
+
+        Returns:
+            Constructed ``ChartSeries``.
+
+        Raises:
+            ChartDataError: If the metric is unknown.
+        """
+        return self._chart_builder.build(self._current_devices, metric_key, direction)
 
     def get_devices(self) -> Sequence[Interface]:
         """Return the sequence of current computer entities (immutable copy)."""

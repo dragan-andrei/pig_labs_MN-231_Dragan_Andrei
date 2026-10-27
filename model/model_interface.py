@@ -5,13 +5,14 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Sequence, Tuple
 
+from model.charting.chart_data_provider import IChartDataProvider
 from model.interface import Interface
 from model.sorting.base_strategy import ISortStrategy
 from model.sorting.direction import SortDirection
 
 
-class IComputerModel(ABC):
-    """Abstract contract for computer data storage, retrieval, and sorting."""
+class IComputerModel(IChartDataProvider, ABC):
+    """Abstract contract for computer data storage, retrieval, sorting and chart data."""
 
     @abstractmethod
     def get_devices(self) -> Sequence[Interface]:

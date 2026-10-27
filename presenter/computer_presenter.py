@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from model.exceptions import DomainError
 from model.device_factory import DeviceFactory
 from model.interface import Interface
 from model.model_interface import IComputerModel
 from presenter.adapters.presenter_factory import DevicePresenterFactory
+from presenter.chart_presenter import ChartPresenter
+from presenter.chart_presenter_interface import IChartPresenter
 from presenter.presenter_interface import IComputerPresenter
 from view.view_interface import IComputerView
 from view.view_model import DeviceViewModel
@@ -26,10 +28,22 @@ class ComputerPresenter(IComputerPresenter):
         """
         self._model = model
         self._view = view
+        self._chart_presenter: Optional[IChartPresenter] = None
 
     def initialize(self) -> None:
         """Load initial device state from model and render onto view."""
         self._update_view_from_model()
+
+    def handle_chart_requested(self) -> None:
+        """Open (or focus) the chart frame and bind a dedicated chart presenter."""
+        if self._chart_presenter is not None and self._chart_presenter.is_active():
+            self._view.focus_chart_view()
+            return
+        chart_view = self._view.open_chart_view()
+        chart_presenter = ChartPresenter(model=self._model, view=chart_view)
+        chart_view.set_presenter(chart_presenter)
+        chart_presenter.initialize()
+        self._chart_presenter = chart_presenter
 
     def handle_sort_requested(self, key_name: str) -> None:
         """Process sorting request triggered by view button callback.
@@ -113,6 +127,8 @@ class ComputerPresenter(IComputerPresenter):
             active_key=active_key,
             direction_arrow=direction_arrow,
         )
+        if self._chart_presenter is not None and self._chart_presenter.is_active():
+            self._chart_presenter.handle_refresh_requested()
 
     def __repr__(self) -> str:
         """Return developer representation."""

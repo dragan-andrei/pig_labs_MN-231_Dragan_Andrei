@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import unittest
-from typing import List, Optional, Sequence
+from typing import Dict, List, Optional, Sequence
 
 from model.catalog import ComputerCatalog
 from model.computer import Computer
 from model.computer_model import ComputerModel
-from model.exceptions import EntityValidationError, ModelError
+from model.exceptions import ChartDataError, EntityValidationError, ModelError
 from model.interface import Interface
 from model.laptop import Laptop
 from model.pc import PC
@@ -17,8 +17,47 @@ from model.sorting.direction import SortDirection
 from presenter.adapters.presenter_factory import DevicePresenterFactory
 from presenter.computer_presenter import ComputerPresenter
 from presenter.presenter_interface import IComputerPresenter
+from view.chart_view_interface import IChartView
+from view.chart_view_model import ChartViewModel
 from view.view_interface import IComputerView
 from view.view_model import DeviceViewModel
+
+
+class MockChartView(IChartView):
+    """Mock chart frame recording presenter output."""
+
+    def __init__(self) -> None:
+        self.presenter: Optional[object] = None
+        self.options: Dict[str, str] = {}
+        self.active_key: str = ""
+        self.chart: Optional[ChartViewModel] = None
+        self.arrow: Optional[str] = None
+        self.error: Optional[str] = None
+        self.opened: bool = True
+
+    def set_presenter(self, presenter: object) -> None:
+        self.presenter = presenter
+
+    def set_metric_options(self, options: Dict[str, str], active_key: str) -> None:
+        self.options, self.active_key = dict(options), active_key
+
+    def render_chart(self, chart: ChartViewModel) -> None:
+        self.chart = chart
+
+    def update_sort_state(self, arrow: Optional[str]) -> None:
+        self.arrow = arrow
+
+    def show_error(self, message: str) -> None:
+        self.error = message
+
+    def is_open(self) -> bool:
+        return self.opened
+
+    def focus(self) -> None:
+        pass
+
+    def close(self) -> None:
+        self.opened = False
 
 
 class MockComputerView(IComputerView):
@@ -58,6 +97,13 @@ class MockComputerView(IComputerView):
         self.last_error = message
 
     def start(self) -> None:
+        pass
+
+    def open_chart_view(self) -> IChartView:
+        self.chart_view = MockChartView()
+        return self.chart_view
+
+    def focus_chart_view(self) -> None:
         pass
 
     def close(self) -> None:
@@ -177,6 +223,46 @@ class TestPresenterArchitecture(unittest.TestCase):
 
         self.assertEqual(srv_pres.type_badge[0], "Server")
         self.assertEqual(srv_pres.extra_text, "3U Rack")
+
+
+class TestChartIntegration(unittest.TestCase):
+    """Verify chart data flow Model -> ChartPresenter -> IChartView."""
+
+    def setUp(self) -> None:
+        self.model = ComputerModel(ComputerCatalog().create_devices())
+        self.view = MockComputerView()
+        self.presenter = ComputerPresenter(model=self.model, view=self.view)
+        self.view.set_presenter(self.presenter)
+        self.presenter.initialize()
+
+    def test_model_builds_series(self) -> None:
+        series = self.model.get_chart_series("ram", SortDirection.DESCENDING)
+        self.assertEqual(len(series), 30)
+        self.assertEqual(list(series.values), sorted(series.values, reverse=True))
+
+    def test_unknown_metric_raises(self) -> None:
+        with self.assertRaises(ChartDataError):
+            self.model.get_chart_series("gpu")
+
+    def test_chart_requested_renders_and_sorts(self) -> None:
+        self.presenter.handle_chart_requested()
+        chart_view = self.view.chart_view
+        self.assertIn("cpu", chart_view.options)
+        self.assertIsNotNone(chart_view.chart)
+        self.assertEqual(len(chart_view.chart.values), 30)
+
+        chart_view.presenter.handle_sort_requested()
+        self.assertEqual(chart_view.arrow, SortDirection.DESCENDING.arrow)
+        values = list(chart_view.chart.values)
+        self.assertEqual(values, sorted(values, reverse=True))
+
+        chart_view.presenter.handle_metric_selected("storage")
+        self.assertIn("Storage", chart_view.chart.title)
+
+    def test_chart_refreshes_on_catalog_change(self) -> None:
+        self.presenter.handle_chart_requested()
+        self.presenter.handle_delete_requested(0)
+        self.assertEqual(len(self.view.chart_view.chart.values), 29)
 
 
 if __name__ == "__main__":

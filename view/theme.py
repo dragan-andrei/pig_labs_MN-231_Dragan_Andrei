@@ -40,3 +40,10 @@ class PurpleTheme:
     BADGE_LAPTOP_TEXT: Final[str] = "#f472b6"
     BADGE_SERVER_BG: Final[str] = "#201f4c"
     BADGE_SERVER_TEXT: Final[str] = "#93c5fd"
+
+    # Chart (Matplotlib) tokens
+    CHART_FIGURE_BG: Final[str] = "#191224"
+    CHART_AXES_BG: Final[str] = "#1e152a"
+    CHART_GRID: Final[str] = "#36204d"
+    CHART_AVERAGE_LINE: Final[str] = "#fbbf24"
+    CHART_DEFAULT_BAR: Final[str] = "#a78bfa"

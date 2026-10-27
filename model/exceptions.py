@@ -17,3 +17,7 @@ class SortStrategyError(DomainError):
 
 class ModelError(DomainError):
     """Raised when model state operation fails."""
+
+
+class ChartDataError(DomainError):
+    """Raised when chart series cannot be built or are inconsistent."""

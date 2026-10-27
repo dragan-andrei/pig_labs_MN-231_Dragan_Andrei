@@ -8,6 +8,8 @@ from typing import Optional, Sequence
 import customtkinter
 
 from presenter.presenter_interface import IComputerPresenter
+from view.chart_view_interface import IChartView
+from view.chart_window import ChartWindow
 from view.theme import PurpleTheme
 from view.view_interface import IComputerView
 from view.view_model import DeviceViewModel
@@ -26,6 +28,7 @@ class ComputerView(IComputerView):
         self._presenter: Optional[IComputerPresenter] = None
         self._window = customtkinter.CTk()
         self._device_cards: list[DeviceCard] = []
+        self._chart_window: Optional[ChartWindow] = None
         self._image_repository = DeviceImageRepository(
             Path(__file__).resolve().parents[1] / "assets" / "devices"
         )
@@ -85,14 +88,48 @@ class ComputerView(IComputerView):
             on_sort_requested=self._handle_sort_clicked,
         )
         self._button_bar.grid(row=1, column=0, padx=18, pady=(0, 8), sticky="ew")
+        action_bar = customtkinter.CTkFrame(self._window, fg_color="transparent")
+        action_bar.grid(row=2, column=0, padx=18, pady=(0, 18), sticky="ew")
+        action_bar.grid_columnconfigure((0, 1), weight=1)
         self._add_button = customtkinter.CTkButton(
-            self._window,
+            action_bar,
             text="＋ Добавить устройство",
             command=self._open_add_dialog,
             fg_color=PurpleTheme.BTN_ACTIVE_BG,
             hover_color=PurpleTheme.BTN_ACTIVE_HOVER,
         )
-        self._add_button.grid(row=2, column=0, padx=18, pady=(0, 18), sticky="ew")
+        self._add_button.grid(row=0, column=0, padx=(0, 6), sticky="ew")
+        self._chart_button = customtkinter.CTkButton(
+            action_bar,
+            text="Графики",
+            command=self._handle_chart_clicked,
+            fg_color=PurpleTheme.BTN_DEFAULT_BG,
+            hover_color=PurpleTheme.BTN_DEFAULT_HOVER,
+            border_width=1,
+            border_color=PurpleTheme.BORDER_ACTIVE,
+        )
+        self._chart_button.grid(row=0, column=1, padx=(6, 0), sticky="ew")
+
+    def _handle_chart_clicked(self) -> None:
+        """Delegate chart frame request to presenter."""
+        if self._presenter is not None:
+            self._presenter.handle_chart_requested()
+
+    def open_chart_view(self) -> IChartView:
+        """Create a new chart frame bound to the main window.
+
+        Returns:
+            The chart window as an ``IChartView`` abstraction.
+        """
+        if self._chart_window is not None:
+            self._chart_window.close()
+        self._chart_window = ChartWindow(self._window)
+        return self._chart_window
+
+    def focus_chart_view(self) -> None:
+        """Bring the existing chart frame to the front."""
+        if self._chart_window is not None and self._chart_window.is_open():
+            self._chart_window.focus()
 
     def _handle_sort_clicked(self, key_name: str) -> None:
         """Callback triggered by toolbar buttons, delegating directly to presenter.

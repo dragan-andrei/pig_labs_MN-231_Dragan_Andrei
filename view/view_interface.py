@@ -5,6 +5,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Optional, Sequence
 
+from view.chart_view_interface import IChartView
 from view.view_model import DeviceViewModel
 
 if TYPE_CHECKING:
@@ -57,6 +58,14 @@ class IComputerView(ABC):
         Args:
             message: Descriptive error message.
         """
+
+    @abstractmethod
+    def open_chart_view(self) -> IChartView:
+        """Create the separate chart frame and return it as an abstraction."""
+
+    @abstractmethod
+    def focus_chart_view(self) -> None:
+        """Bring an already opened chart frame to the front."""
 
     @abstractmethod
     def start(self) -> None:

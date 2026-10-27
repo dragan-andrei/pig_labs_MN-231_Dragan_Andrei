@@ -36,3 +36,7 @@ class IComputerPresenter(ABC):
     @abstractmethod
     def handle_delete_requested(self, index: int) -> None:
         """Handle deletion of a device requested by the view."""
+
+    @abstractmethod
+    def handle_chart_requested(self) -> None:
+        """Handle opening of the separate chart frame."""

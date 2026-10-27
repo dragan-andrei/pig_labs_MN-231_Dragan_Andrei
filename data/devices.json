@@ -2,24 +2,6 @@
   {
     "type": "PC",
     "parameters": {
-      "cpu": "Intel Core i3",
-      "ram": 8,
-      "storage": 256,
-      "form_factor": "Mini-ITX"
-    }
-  },
-  {
-    "type": "PC",
-    "parameters": {
-      "cpu": "Intel Core i5",
-      "ram": 16,
-      "storage": 512,
-      "form_factor": "ATX"
-    }
-  },
-  {
-    "type": "PC",
-    "parameters": {
       "cpu": "Intel Core i7",
       "ram": 24,
       "storage": 768,
@@ -33,15 +15,6 @@
       "ram": 32,
       "storage": 1024,
       "form_factor": "ATX"
-    }
-  },
-  {
-    "type": "PC",
-    "parameters": {
-      "cpu": "AMD Ryzen 3",
-      "ram": 8,
-      "storage": 1280,
-      "form_factor": "Mini-ITX"
     }
   },
   {
@@ -87,24 +60,6 @@
       "ram": 16,
       "storage": 2560,
       "form_factor": "ATX"
-    }
-  },
-  {
-    "type": "Laptop",
-    "parameters": {
-      "cpu": "Apple M1",
-      "ram": 8,
-      "storage": 512,
-      "battery_life": 6
-    }
-  },
-  {
-    "type": "Laptop",
-    "parameters": {
-      "cpu": "Apple M2",
-      "ram": 16,
-      "storage": 1024,
-      "battery_life": 7
     }
   },
   {
@@ -272,10 +227,10 @@
   {
     "type": "PC",
     "parameters": {
-      "cpu": "Apple M5 MAX",
-      "ram": 900,
-      "storage": 12980,
-      "form_factor": "1"
+      "cpu": "i7",
+      "ram": 67,
+      "storage": 67,
+      "form_factor": "atx"
     }
   }
 ]
